@@ -2,29 +2,23 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use App\Http\Controllers\EdukasiController;
+use App\Http\Controllers\RiwayatController;
+use App\Http\Controllers\ChatbotController;
 
 Route::get('/', function () {
+    return view('index');
+});
+
+Route::get('/scan', function () {
     return view('scan.index');
 });
 
-Route::get('/edukasi', function () {
-    return view('edukasi.index');
-});
+Route::get('/edukasi', [EdukasiController::class, 'index'])->name('edukasi.index');
 
-Route::get('/riwayat', function () {
-    return view('riwayat.index');
-});
+Route::get('/edukasi/{slug}', [EdukasiController::class, 'show'])->name('edukasi.show');
 
-Route::post('/chatbot', function (Request $request) {
-    $msg = strtolower($request->message);
+Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
 
-    if (strpos($msg, 'halo') !== false) {
-        return response()->json(['reply' => 'Halo! Ada yang bisa aku bantu?']);
-    }
-
-    if (strpos($msg, 'scan') !== false) {
-        return response()->json(['reply' => 'Untuk scan sampah, arahkan kamera ke objek dan klik Capture.']);
-    }
-
-    return response()->json(['reply' => 'Maaf, aku belum mengerti. Coba ulangi pesanmu!']);
-});
+Route::get('/chatbot', [ChatbotController::class, 'index']);
+Route::post('/chatbot', [ChatbotController::class, 'chat']);

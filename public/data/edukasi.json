@@ -1,0 +1,14 @@
+[
+    {
+        "slug": "organik",
+        "title": "Sampah Organik",
+        "image": "img/organik.jpg",
+        "view": "edukasi.modules.organik"
+    },
+    {
+        "slug": "anorganik",
+        "title": "Sampah Anorganik",
+        "image": "img/anorganik.jpg",
+        "view": "edukasi.modules.anorganik"
+    }
+]

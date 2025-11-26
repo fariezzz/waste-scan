@@ -6,24 +6,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan Sampah</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 
 <body>
     @include('partials.navbar')
-    <div class="container py-4">
+    <div class="container {{ request()->is('chatbot') ? '' : 'py-4 mb-5' }}">
         @yield('content')
     </div>
 
-    <div class="chatbot-btn">
-        💬
-    </div>
+    @if (!request()->is('chatbot'))
+        <a id="chatbot-btn" class="chatbot-btn" href="/chatbot">
+            <img src="{{ asset('icons/Chatbot.svg') }}" alt="Logo" class="chatbot-icon">
+        </a>
+        <div class="chatbot-label">Chatbot</div>
+    @endif
 
-    <div id="chatbot-btn" class="chatbot-btn">💬</div>
 
-    <div id="chatbot-window" class="chatbot-window">
+    {{-- <div id="chatbot-window" class="chatbot-window">
         <div class="chat-header">
             Chatbot
             <span id="chat-close" style="cursor:pointer;">×</span>
@@ -33,9 +35,11 @@
             <input type="text" id="chat-message" placeholder="Tulis pesan..." />
             <button id="chat-send">Send</button>
         </div>
-    </div>
+    </div> --}}
 
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    {{-- <script>
         const chatBtn = document.getElementById('chatbot-btn');
         const chatWindow = document.getElementById('chatbot-window');
         const chatClose = document.getElementById('chat-close');
@@ -88,10 +92,9 @@
                     chatBody.scrollTop = chatBody.scrollHeight;
                 });
         }
-    </script>
+    </script> --}}
 
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('script')
 </body>
 
 </html>

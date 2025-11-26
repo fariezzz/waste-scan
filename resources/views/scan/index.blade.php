@@ -13,16 +13,17 @@
     </div>
 
     <div class="d-flex justify-content-center align-items-center mt-4 controls-area">
-        <div class="control-btn text-center mt-3">
+        <div id="uploadBtn" class="control-btn text-center mb-3">
+            <span>UPLOAD</span>
             <i class="bi bi-upload icon"></i>
-            <p>UPLOAD</p>
+            <input type="file" id="imageInput" accept="image/*" style="display:none;">
         </div>
 
-        <div id="previewCircle" class="mb-1"></div>
+        <div id="captureButton" class="my-3 mx-5" role="button"></div>
 
-        <div class="control-btn text-center mt-3">
+        <div class="control-btn text-center mb-3">
+            <span>HAPUS</span>
             <i class="bi bi-trash icon"></i>
-            <p>HAPUS</p>
         </div>
     </div>
 
@@ -31,11 +32,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // ===== MODE SWITCH LOGIC =====
+            // GANTI MODE
             const modeClassify = document.getElementById('modeClassify');
             const modeDetect = document.getElementById('modeDetect');
 
-            let currentMode = "classify"; // default
+            let currentMode = "classify";
 
             function updateModeUI() {
                 if (currentMode === "classify") {
@@ -59,14 +60,12 @@
                 console.log("Mode: Deteksi Sampah");
             });
 
-            updateModeUI(); // Apply initial state
+            updateModeUI();
 
-
-            // ===== CAMERA SCRIPT KAMU (TIDAK DIUBAH) =====
+            // CAMERA SCRIPT
             const video = document.getElementById('camera');
             const resultImg = document.getElementById('result');
-            const captureBtn = document.getElementById('captureBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
+            const captureBtn = document.getElementById('captureButton');
 
             let stream = null;
 
@@ -78,10 +77,10 @@
                         }
                     });
                     video.srcObject = stream;
-                    video.style.transform = 'scaleX(-1)';
+                    // video.style.transform = 'scaleX(-1)';
                 } catch (err) {
-                    console.error('Camera Error: ', err);
-                    alert('Gagal mengakses kamera. Cek izin (permissions) atau coba browser lain.');
+                    console.error('Camera Error:', err);
+                    alert('Gagal mengakses kamera. Cek izin browser.');
                 }
             }
 
@@ -93,36 +92,54 @@
             }
 
             captureBtn.addEventListener('click', () => {
-                if (!video || video.readyState < 2) return alert('Kamera belum siap. Tunggu sebentar.');
+                if (!video || video.readyState < 2)
+                    return alert('Kamera belum siap. Tunggu sebentar.');
 
                 const canvas = document.createElement('canvas');
                 const w = video.videoWidth || 1280;
                 const h = video.videoHeight || 720;
+
                 canvas.width = w;
                 canvas.height = h;
+
                 const ctx = canvas.getContext('2d');
 
-                ctx.translate(w, 0);
-                ctx.scale(-1, 1);
+                // ctx.translate(w, 0);
+                // ctx.scale(-1, 1);
                 ctx.drawImage(video, 0, 0, w, h);
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                // ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-                const dataURL = canvas.toDataURL('image/png');
-                resultImg.src = dataURL;
+                resultImg.src = canvas.toDataURL('image/png');
                 resultImg.style.display = 'block';
-                downloadBtn.disabled = false;
-
-                downloadBtn.onclick = () => {
-                    const a = document.createElement('a');
-                    a.href = dataURL;
-                    a.download = 'scan_sampah.png';
-                    a.click();
-                };
             });
 
             startCamera();
             window.addEventListener('beforeunload', stopCamera);
 
+            // UPLOAD IMAGE
+            const uploadBtn = document.getElementById('uploadBtn');
+            const imageInput = document.getElementById('imageInput');
+
+            uploadBtn.addEventListener('click', () => {
+                imageInput.click();
+            });
+
+            imageInput.addEventListener('change', () => {
+                const file = imageInput.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith("image/")) {
+                    alert("File harus berupa foto!");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    resultImg.src = e.target.result;
+                    resultImg.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            });
         });
     </script>
 @endsection
