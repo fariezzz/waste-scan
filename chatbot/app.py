@@ -55,7 +55,7 @@ def home(request: Request):
     """Tampilkan halaman web chatbot"""
     return templates.TemplateResponse("chat.html", {"request": request})
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/", response_model=ChatResponse)
 def chat(request: ChatRequest):
     try:
         # Siapkan percakapan

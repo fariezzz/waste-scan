@@ -22,12 +22,12 @@ class ChatbotController extends Controller
             ]
         ]);
 
-        // Print isi lengkap respons untuk debugging
-        return response()->json([
-            "status" => $response->status(),
-            "body"   => $response->body(),      // respons mentah dari Render
-            "json"   => $response->json(),      // respon setelah decode
-            "url"    => env('CHATBOT_API_URL'),
-        ]);
+        if ($response->failed()) {
+            return response()->json([
+                "reply" => "⚠️ Chatbot sedang tidak tersedia."
+            ]);
+        }
+
+        return response()->json($response->json());
     }
 }
