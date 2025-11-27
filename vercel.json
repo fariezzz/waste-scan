@@ -1,51 +1,33 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "public/**/*",
-            "use": "@vercel/static"
-        },
-        {
-            "src": "api/index.php",
-            "use": "vercel-php@0.7.4"
-        }
-    ],
+    "framework": null,
+    "functions": {
+        "api/index.php": { "runtime": "vercel-php@0.7.4" }
+    },
     "routes": [
-        {
-            "src": "/css/(.*)",
-            "dest": "/public/css/$1"
-        },
-        {
-            "src": "/img/(.*)",
-            "dest": "/public/img/$1"
-        },
-        {
-            "src": "/icons/(.*)",
-            "dest": "/public/icons/$1"
-        },
-        {
-            "src": "/data/(.*)",
-            "dest": "/public/data/$1"
-        },
-        {
-            "src": "/build/(.*)",
-            "dest": "/public/build/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/api/index.php"
-        }
+        { "src": "/css/(.*)", "dest": "/public/css/" },
+        { "src": "/data/(.*)", "dest": "/public/data/" },
+        { "src": "/icons/(.*)", "dest": "/public/icons/" },
+        { "src": "/img/(.*)", "dest": "/public/img/" },
+        { "src": "/build/(.*)", "dest": "/public/build/" },
+        { "src": "/(.*)", "dest": "/api/index.php" }
     ],
-    "buildCommand": "npm install && npm run build",
+    "public": true,
+    "buildCommand": "vite build",
     "outputDirectory": "public",
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
         "APP_URL": "https://waste-scan.vercel.app/",
         "APP_KEY": "base64:vUE6/cbXWdiO4S4aXEdUjDX40m7Q/g7U/0HGnmYhUwc=",
+        "APP_CONFIG_CACHE": "/tmp/config.php",
+        "APP_EVENTS_CACHE": "/tmp/events.php",
+        "APP_PACKAGES_CACHE": "/tmp/packages.php",
+        "APP_ROUTES_CACHE": "/tmp/routes.php",
+        "APP_SERVICES_CACHE": "/tmp/services.php",
         "VIEW_COMPILED_PATH": "/tmp",
         "CACHE_DRIVER": "array",
-        "SESSION_DRIVER": "cookie",
-        "LOG_CHANNEL": "stderr"
+        "LOG_CHANNEL": "stderr",
+        "SESSION_DRIVER": "cookie"
     }
 }
