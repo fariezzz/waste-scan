@@ -5,9 +5,18 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from datetime import datetime
 from chatbot.core.groq_api import send_message
+from fastapi.middleware.cors import CORSMiddleware
 import os
 
 app = FastAPI(title="W.A.S.T.E AI Chatbot")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # === Konfigurasi folder templates dan static ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -44,9 +53,9 @@ def save_log(role: str, text: str):
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     """Tampilkan halaman web chatbot"""
-    return templates.TemplateResponse("chat.html", {"request": request})
+    return templates.TemplateResponse("../resources/views/chatbot/index.blade.php", {"request": request})
 
-@app.post("/", response_model=ChatResponse)
+@app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
     try:
         # Siapkan percakapan

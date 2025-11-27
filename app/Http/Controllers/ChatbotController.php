@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Http;
 
 class ChatbotController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         return view('chatbot.index');
     }
 
@@ -27,6 +28,11 @@ class ChatbotController extends Controller
             ]);
         }
 
-        return $response->json();
+        // Pastikan isinya ada
+        $data = $response->json();
+
+        return response()->json([
+            "reply" => $data["reply"] ?? "⚠️ Tidak ada respons dari chatbot.",
+        ]);
     }
 }
