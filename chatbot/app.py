@@ -53,7 +53,7 @@ def save_log(role: str, text: str):
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     """Tampilkan halaman web chatbot"""
-    return templates.TemplateResponse("../resources/views/chatbot/index.blade.php", {"request": request})
+    return templates.TemplateResponse("chat.html", {"request": request})
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
