@@ -3,3 +3,6 @@ requests
 fastapi
 uvicorn
 colorama
+jinja2
+python-multipart
+groq
