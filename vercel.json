@@ -1,27 +1,36 @@
 {
     "version": 2,
-    "framework": null,
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.7.4"
         }
     },
+    "builds": [
+        {
+            "src": "public/**/*",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "api/index.php",
+            "use": "vercel-php@0.7.4"
+        }
+    ],
     "routes": [
         {
             "src": "/css/(.*)",
             "dest": "/public/css/$1"
         },
         {
-            "src": "/data/(.*)",
-            "dest": "/public/data/$1"
+            "src": "/img/(.*)",
+            "dest": "/public/img/$1"
         },
         {
             "src": "/icons/(.*)",
             "dest": "/public/icons/$1"
         },
         {
-            "src": "/img/(.*)",
-            "dest": "/public/img/$1"
+            "src": "/data/(.*)",
+            "dest": "/public/data/$1"
         },
         {
             "src": "/build/(.*)",
@@ -32,22 +41,16 @@
             "dest": "/api/index.php"
         }
     ],
-    "public": true,
-    "buildCommand": "vite build",
+    "buildCommand": "npm install && npm run build",
     "outputDirectory": "public",
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
         "APP_URL": "https://waste-scan.vercel.app/",
-        "APP_KEY": "base64:vUE6/cbXWdiO4S4aXEdUjDX40m7Q/g7U/0HGnmYhUwc=",
-        "APP_CONFIG_CACHE": "/tmp/config.php",
-        "APP_EVENTS_CACHE": "/tmp/events.php",
-        "APP_PACKAGES_CACHE": "/tmp/packages.php",
-        "APP_ROUTES_CACHE": "/tmp/routes.php",
-        "APP_SERVICES_CACHE": "/tmp/services.php",
+        "APP_KEY": "base64:vUE6...",
         "VIEW_COMPILED_PATH": "/tmp",
         "CACHE_DRIVER": "array",
-        "LOG_CHANNEL": "stderr",
-        "SESSION_DRIVER": "cookie"
+        "SESSION_DRIVER": "cookie",
+        "LOG_CHANNEL": "stderr"
     }
 }
