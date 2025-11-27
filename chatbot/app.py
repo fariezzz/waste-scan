@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from datetime import datetime
-from .core.groq_api import send_message   # ⬅️ ubah ini ke path relatif
+from chatbot.core.groq_api import send_message
 import os
 
 app = FastAPI(title="W.A.S.T.E AI Chatbot")
@@ -46,7 +46,7 @@ def home(request: Request):
     """Tampilkan halaman web chatbot"""
     return templates.TemplateResponse("chat.html", {"request": request})
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/", response_model=ChatResponse)
 def chat(request: ChatRequest):
     try:
         # Siapkan percakapan
