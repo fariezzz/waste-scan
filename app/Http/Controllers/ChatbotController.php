@@ -15,7 +15,7 @@ class ChatbotController extends Controller
     {
         $message = $request->input('message');
 
-        $response = Http::post('http://127.0.0.1:5001/chat', [
+        $response = Http::post(env('CHATBOT_API_URL'), [
             "messages" => [
                 ["role" => "user", "content" => $message]
             ]
