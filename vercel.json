@@ -5,11 +5,11 @@
         "api/index.php": { "runtime": "vercel-php@0.7.4" }
     },
     "routes": [
-        { "src": "/img/(.*)", "dest": "/public/img/" },
         { "src": "/css/(.*)", "dest": "/public/css/" },
-        { "src": "/build/(.*)", "dest": "/public/build/" },
         { "src": "/data/(.*)", "dest": "/public/data/" },
         { "src": "/icons/(.*)", "dest": "/public/icons/" },
+        { "src": "/img/(.*)", "dest": "/public/img/" },
+        { "src": "/build/(.*)", "dest": "/public/build/" },
         { "src": "/(.*)", "dest": "/api/index.php" }
     ],
     "public": true,
@@ -18,7 +18,7 @@
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
-        "APP_URL": "https://wastescan.vercel.app/",
+        "APP_URL": "https://waste-scan.vercel.app/",
         "APP_KEY": "base64:vUE6/cbXWdiO4S4aXEdUjDX40m7Q/g7U/0HGnmYhUwc=",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
