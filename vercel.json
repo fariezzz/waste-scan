@@ -1,10 +1,5 @@
 {
     "version": 2,
-    "functions": {
-        "api/index.php": {
-            "runtime": "vercel-php@0.7.4"
-        }
-    },
     "builds": [
         {
             "src": "public/**/*",
@@ -47,7 +42,7 @@
         "APP_ENV": "production",
         "APP_DEBUG": "false",
         "APP_URL": "https://waste-scan.vercel.app/",
-        "APP_KEY": "base64:vUE6...",
+        "APP_KEY": "base64:vUE6/cbXWdiO4S4aXEdUjDX40m7Q/g7U/0HGnmYhUwc=",
         "VIEW_COMPILED_PATH": "/tmp",
         "CACHE_DRIVER": "array",
         "SESSION_DRIVER": "cookie",
