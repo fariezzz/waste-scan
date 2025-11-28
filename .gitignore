@@ -28,3 +28,40 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Virtual Environment ---
+venv/
+.venv/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Model Files ---
+*.pt
+*.pth
+models/
+
+# --- Build / cache ---
+build/
+dist/
+*.egg-info/
+.cache/
+pytest_cache/
+
+# --- IDE files ---
+.vscode/
+.idea/
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+logs/
