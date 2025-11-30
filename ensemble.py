@@ -33,11 +33,11 @@ def load_effnet(path, num_classes):
 # =========================
 # INIT MODELS (LOADED ONCE)
 # =========================
-jenis_resnet = load_resnet("Models/resnet50_best_jenis.pth", 12)
-jenis_eff    = load_effnet("Models/efficientnet_b0_best_jenis.pth", 12)
+jenis_resnet = load_resnet("deep-learning/models/resnet50_best_jenis.pth", 12)
+jenis_eff    = load_effnet("deep-learning/models/efficientnet_b0_best_jenis.pth", 12)
 
-kategori_resnet = load_resnet("Models/resnet50_best_kategori.pth", 2)
-kategori_eff    = load_effnet("Models/efficientnet_b0_best_kategori.pth", 2)
+kategori_resnet = load_resnet("deep-learning/models/resnet50_best_kategori.pth", 2)
+kategori_eff    = load_effnet("deep-learning/models/efficientnet_b0_best_kategori.pth", 2)
 
 # =========================
 # LABELS

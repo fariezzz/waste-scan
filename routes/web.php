@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\EdukasiController;
 use App\Http\Controllers\RiwayatController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\AIController;
 
 Route::get('/', function () {
     return view('index');
@@ -22,3 +23,5 @@ Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
 
 Route::get('/chatbot', [ChatbotController::class, 'index']);
 Route::post('/chatbot', [ChatbotController::class, 'chat']);
+
+Route::post('/ai/process', [AIController::class, 'process']);

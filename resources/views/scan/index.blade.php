@@ -28,11 +28,17 @@
     </div>
 
     <img id="result" class="mt-3 w-100 rounded" style="border:1px solid #ccc; display:none;" />
+    <div id="resultText" class="mt-3 text-center" style="font-size: 18px; display:none;"></div>
+    <div id="aiChatReply" class="mt-3 text-start" style="font-size: 16px; display:none;"></div>
+@endsection
 
+@push('script')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // GANTI MODE
+            // =======================
+            // MODE SWITCH
+            // =======================
             const modeClassify = document.getElementById('modeClassify');
             const modeDetect = document.getElementById('modeDetect');
 
@@ -51,18 +57,21 @@
             modeClassify.addEventListener('click', () => {
                 currentMode = "classify";
                 updateModeUI();
-                console.log("Mode: Klasifikasi Sampah");
+                console.log("Mode: classify");
             });
 
             modeDetect.addEventListener('click', () => {
                 currentMode = "detect";
                 updateModeUI();
-                console.log("Mode: Deteksi Sampah");
+                console.log("Mode: detect");
             });
 
             updateModeUI();
 
+
+            // =======================
             // CAMERA SCRIPT
+            // =======================
             const video = document.getElementById('camera');
             const resultImg = document.getElementById('result');
             const captureBtn = document.getElementById('captureButton');
@@ -77,10 +86,9 @@
                         }
                     });
                     video.srcObject = stream;
-                    // video.style.transform = 'scaleX(-1)';
                 } catch (err) {
                     console.error('Camera Error:', err);
-                    alert('Gagal mengakses kamera. Cek izin browser.');
+                    alert('Gagal mengakses kamera.');
                 }
             }
 
@@ -91,9 +99,12 @@
                 }
             }
 
-            captureBtn.addEventListener('click', () => {
+            // =======================
+            // CAPTURE BUTTON
+            // =======================
+            captureBtn.addEventListener('click', async () => {
                 if (!video || video.readyState < 2)
-                    return alert('Kamera belum siap. Tunggu sebentar.');
+                    return alert('Kamera belum siap.');
 
                 const canvas = document.createElement('canvas');
                 const w = video.videoWidth || 1280;
@@ -103,20 +114,63 @@
                 canvas.height = h;
 
                 const ctx = canvas.getContext('2d');
-
-                // ctx.translate(w, 0);
-                // ctx.scale(-1, 1);
                 ctx.drawImage(video, 0, 0, w, h);
-                // ctx.setTransform(1, 0, 0, 1, 0, 0);
 
+                // tampilkan preview
                 resultImg.src = canvas.toDataURL('image/png');
                 resultImg.style.display = 'block';
+
+                // konversi ke Blob
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+
+                // =======================
+                // SEND TO LARAVEL
+                // =======================
+                const formData = new FormData();
+                formData.append("image", blob, "capture.jpg");
+                formData.append("mode", currentMode);
+
+                const resultText = document.getElementById('resultText');
+                resultText.innerHTML = "⏳ Memproses...";
+                resultText.style.display = "block";
+
+                try {
+                    const response = await fetch("/ai/process", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    console.log("HASIL AI:", data);
+
+                    if (currentMode === "classify") {
+                        resultText.innerHTML = `
+                        <b>Jenis:</b> ${data.jenis} <br>
+                        <b>Kategori:</b> ${data.kategori}
+                    `;
+                    } else {
+                        if (data.count === 0) {
+                            resultText.innerHTML = "❌ Tidak ada sampah terdeteksi";
+                        } else {
+                            resultText.innerHTML = `
+                            <b>Terdeteksi ${data.count} sampah:</b><br>
+                            ${data.detections.map(
+                                d => `• ${d.class} (${(d.confidence * 100).toFixed(1)}%)`
+                            ).join("<br>")}
+                        `;
+                        }
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    resultText.innerHTML = "⚠️ Gagal memproses gambar";
+                }
             });
 
-            startCamera();
-            window.addEventListener('beforeunload', stopCamera);
 
-            // UPLOAD IMAGE
+            // =======================
+            // UPLOAD FILE MANUAL
+            // =======================
             const uploadBtn = document.getElementById('uploadBtn');
             const imageInput = document.getElementById('imageInput');
 
@@ -124,22 +178,86 @@
                 imageInput.click();
             });
 
-            imageInput.addEventListener('change', () => {
+            imageInput.addEventListener('change', async () => {
                 const file = imageInput.files[0];
                 if (!file) return;
 
-                if (!file.type.startsWith("image/")) {
-                    alert("File harus berupa foto!");
-                    return;
-                }
+                resultImg.src = URL.createObjectURL(file);
+                resultImg.style.display = "block";
 
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    resultImg.src = e.target.result;
-                    resultImg.style.display = "block";
-                };
-                reader.readAsDataURL(file);
+                const formData = new FormData();
+                formData.append("image", file);
+                formData.append("mode", currentMode);
+
+                const resultText = document.getElementById('resultText');
+                resultText.innerHTML = "⏳ Memproses...";
+                resultText.style.display = "block";
+
+                const response = await fetch("/ai/process", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (currentMode === "classify") {
+
+                    resultText.innerHTML = `
+                        <b>Jenis:</b> ${data.jenis} <br>
+                        <b>Kategori:</b> ${data.kategori}
+                    `;
+
+                    // pesan otomatis
+                    const autoMsg =
+                        `Aku nemu sampah kategori ${data.kategori} dengan jenis ${data.jenis}. Gimana cara ngolahnya?`;
+
+                    const chatReplyBox = document.getElementById("aiChatReply");
+                    chatReplyBox.style.display = "block";
+                    chatReplyBox.innerHTML = "🤖 Sedang memproses jawaban...";
+
+                    // KIRIM KE CHATBOT
+                    fetch("/chatbot", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                message: autoMsg
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            chatReplyBox.innerHTML = `
+                                <div class="p-3 rounded" style="background:#E8FFD8; border-left: 5px solid #6CC46C;">
+                                    <b>Pertanyaan:</b><br>
+                                    ${autoMsg}<br><br>
+
+                                    <b>Jawaban W.A.S.T.E AI:</b><br>
+                                    ${data.reply}
+                                </div>
+                            `;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            chatReplyBox.innerHTML = "⚠️ Chatbot tidak bisa merespon sekarang.";
+                        });
+                } else {
+                    if (data.count === 0) {
+                        resultText.innerHTML = "❌ Tidak ada sampah terdeteksi";
+                    } else {
+                        resultText.innerHTML = `
+                        <b>Terdeteksi ${data.count} sampah:</b><br>
+                        ${data.detections.map(
+                            d => `• ${d.class} (${(d.confidence * 100).toFixed(1)}%)`
+                        ).join("<br>")}
+                    `;
+                    }
+                }
             });
+
+            startCamera();
+            window.addEventListener('beforeunload', stopCamera);
         });
     </script>
-@endsection
+@endpush

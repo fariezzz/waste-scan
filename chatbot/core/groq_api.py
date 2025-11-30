@@ -10,7 +10,7 @@ print("Mencari .env di:", env_path)
 
 load_dotenv(dotenv_path=env_path)
 
-API_KEY = "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"
+API_KEY = os.getenv("GROQ_API_KEY")
 print("Loaded API Key.....", bool(API_KEY))  # harus True nanti
 
 # URL endpoint Groq

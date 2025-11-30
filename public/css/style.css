@@ -41,6 +41,98 @@ body {
     }
 }
 
+/* ==== Landing Page Compact ==== */
+
+.menu-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 30px;
+}
+
+/* ===== Row Card Version ===== */
+
+.menu-row {
+    margin-top: 10px;
+}
+
+.menu-row-link {
+    text-decoration: none !important;
+}
+
+.menu-row-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.menu-row-icon {
+    width: 75px;
+    height: 75px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-row-icon img {
+    width: 36px;
+    height: 36px;
+}
+
+.menu-row-card span {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    letter-spacing: 3px;
+    line-height: 1.3;
+}
+
+/* Mobile version: stack vertically (default Bootstrap col-12 already handles this) */
+@media(max-width: 768px) {
+    .menu-row-card span {
+        font-size: 1.2rem;
+    }
+}
+
+/* ===== HERO SECTION ===== */
+.hero-section {
+    height: 45vh;
+    /* tinggi hero */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-title {
+    font-weight: 700;
+    font-size: 2.2rem;
+    color: #2e7d32;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+}
+
+.hero-line {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.hero-line-2 {
+    font-size: 1rem;
+    margin-top: -6px;
+}
+
+/* responsive tweak */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+}
+
+
 #cameraPreview {
     width: 100%;
     height: 55vh;
@@ -413,11 +505,12 @@ table thead td:last-child {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding-bottom: 75px; /* biar bubble terakhir ga ketutup */
+    padding-bottom: 75px;
+    /* biar bubble terakhir ga ketutup */
     scroll-behavior: smooth;
 }
 
-@media(max-width: 768px){
+@media(max-width: 768px) {
     .chat-box {
         margin-top: 1rem;
         padding: 0 !important;
@@ -491,7 +584,7 @@ table thead td:last-child {
 .reset-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0, 0, 0, 0.35);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -509,8 +602,15 @@ table thead td:last-child {
 }
 
 @keyframes popIn {
-    from { transform: scale(.8); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
+    from {
+        transform: scale(.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .reset-modal-actions {
@@ -540,8 +640,15 @@ table thead td:last-child {
 }
 
 @keyframes fadeOut {
-    from { opacity: 1; transform: translateY(0); }
-    to   { opacity: 0; transform: translateY(10px); }
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(10px);
+    }
 }
 
 
@@ -559,8 +666,15 @@ table thead td:last-child {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .bubble-bot {

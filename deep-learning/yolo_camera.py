@@ -5,7 +5,7 @@ from collections import Counter
 # ============================================
 # 1) LOAD MODEL
 # ============================================
-MODEL_PATH = "Models/best.pt"   # sesuaikan dengan posisi best.pt lo
+MODEL_PATH = "deep-learning/models/best.pt"   # sesuaikan dengan posisi best.pt lo
 
 print(f"[INFO] Loading model dari: {MODEL_PATH}")
 model = YOLO(MODEL_PATH)
