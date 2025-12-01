@@ -8,18 +8,23 @@ use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\AIController;
 
 Route::get('/', function () {
-    return view('index');
+    return view('index',
+    ['title' => 'WASTE — Landing Page']);
 });
 
 Route::get('/scan', function () {
-    return view('scan.index');
+    return view('scan.index',
+    ['title' => 'WASTE — Scan']);
 });
 
 Route::get('/edukasi', [EdukasiController::class, 'index'])->name('edukasi.index');
 
 Route::get('/edukasi/{slug}', [EdukasiController::class, 'show'])->name('edukasi.show');
 
-Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
+Route::get('/riwayat', function () {
+    return view('riwayat.index',
+    ['title' => 'WASTE — Riwayat Scan']);
+})->name('riwayat');
 
 Route::get('/chatbot', [ChatbotController::class, 'index']);
 Route::post('/chatbot', [ChatbotController::class, 'chat']);

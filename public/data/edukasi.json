@@ -1,13 +1,13 @@
 [
     {
         "slug": "organik",
-        "title": "Sampah Organik",
+        "title": "Yuk! Kenali Cara Mengelola Sampah Organik!",
         "image": "img/organik.jpg",
         "view": "edukasi.modules.organik"
     },
     {
         "slug": "anorganik",
-        "title": "Sampah Anorganik",
+        "title": "Yuk! Kenali Cara Mengelola Sampah Anorganik!",
         "image": "img/anorganik.jpg",
         "view": "edukasi.modules.anorganik"
     }

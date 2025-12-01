@@ -1,44 +1,65 @@
 @extends('layouts.main')
-
+@section('bodyClass', 'no-scroll-desktop')
 @section('content')
-    <div id="cameraPreview">
-        <video id="camera" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
-    </div>
+    <div id="cameraWrap">
+        <div id="cameraPreview">
+            <video id="camera" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+        </div>
 
-    <div class="text-center mt-3">
-        <div class="mode-switch">
-            <button id="modeClassify" class="mode-btn active">KLASIFIKASI SAMPAH</button>
-            <button id="modeDetect" class="mode-btn">DETEKSI SAMPAH</button>
+        <div class="text-center mt-3">
+            <div class="mode-switch">
+                <button id="modeClassify" class="mode-btn active">KLASIFIKASI SAMPAH</button>
+                <button id="modeDetect" class="mode-btn">DETEKSI SAMPAH</button>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center align-items-center mt-4 controls-area" id="controlsArea">
+            <div id="uploadBtn" class="control-btn text-center mb-3">
+                <span>UPLOAD</span>
+                <div class="icon">
+                    <img src="{{ asset('icons/upload.svg') }}" alt="Logo">
+                </div>
+
+                {{-- <i class="bi bi-upload icon"></i> --}}
+                <input type="file" id="imageInput" accept="image/*" style="display:none;">
+            </div>
+
+            <div id="captureButton" class="my-3 mx-5" role="button"></div>
+
+            <div class="control-btn text-center mb-3" role="button" id="showHistoryBtn">
+                <span>RIWAYAT</span>
+                <div class="icon">
+                    <img src="{{ asset('icons/riwayat.svg') }}" alt="Logo">
+                </div>
+
+                {{-- <i class="bi bi-upload icon"></i> --}}
+            </div>
         </div>
     </div>
 
-    <div class="d-flex justify-content-center align-items-center mt-4 controls-area">
-        <div id="uploadBtn" class="control-btn text-center mb-3">
-            <span>UPLOAD</span>
-            <i class="bi bi-upload icon"></i>
-            <input type="file" id="imageInput" accept="image/*" style="display:none;">
+    <div id="resultView" style="display:none; padding: 12px;">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button id="backToCamera" class="btn btn-light">← Kembali</button>
+            <button id="gotoHistory" class="btn btn-outline-primary">Lihat Riwayat</button>
         </div>
 
-        <div id="captureButton" class="my-3 mx-5" role="button"></div>
-
-        <div class="control-btn text-center mb-3">
-            <span>HAPUS</span>
-            <i class="bi bi-trash icon"></i>
+        <div class="text-center mb-3">
+            <img id="resultLarge" src="" alt="Hasil capture">
         </div>
+
+        <div id="resultText" class="text-center" style="font-size: 18px; display:block; margin-bottom:12px;"></div>
+
+        <div id="aiChatReply" class="text-start" style="font-size: 16px; display:block;"></div>
     </div>
 
     <img id="result" class="mt-3 w-100 rounded" style="border:1px solid #ccc; display:none;" />
-    <div id="resultText" class="mt-3 text-center" style="font-size: 18px; display:none;"></div>
-    <div id="aiChatReply" class="mt-3 text-start" style="font-size: 16px; display:none;"></div>
 @endsection
 
 @push('script')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // =======================
-            // MODE SWITCH
-            // =======================
             const modeClassify = document.getElementById('modeClassify');
             const modeDetect = document.getElementById('modeDetect');
 
@@ -57,24 +78,33 @@
             modeClassify.addEventListener('click', () => {
                 currentMode = "classify";
                 updateModeUI();
-                console.log("Mode: classify");
             });
 
             modeDetect.addEventListener('click', () => {
                 currentMode = "detect";
                 updateModeUI();
-                console.log("Mode: detect");
             });
 
             updateModeUI();
 
 
             // =======================
-            // CAMERA SCRIPT
+            // ELEM
             // =======================
             const video = document.getElementById('camera');
-            const resultImg = document.getElementById('result');
             const captureBtn = document.getElementById('captureButton');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const imageInput = document.getElementById('imageInput');
+            const controlsArea = document.getElementById('controlsArea');
+            const cameraWrap = document.getElementById('cameraWrap');
+
+            const resultView = document.getElementById('resultView');
+            const resultLarge = document.getElementById('resultLarge');
+            const resultText = document.getElementById('resultText');
+            const chatReplyBox = document.getElementById('aiChatReply');
+            const backBtn = document.getElementById('backToCamera');
+            const showHistoryBtn = document.getElementById('showHistoryBtn');
+            const gotoHistory = document.getElementById('gotoHistory');
 
             let stream = null;
 
@@ -87,7 +117,6 @@
                     });
                     video.srcObject = stream;
                 } catch (err) {
-                    console.error('Camera Error:', err);
                     alert('Gagal mengakses kamera.');
                 }
             }
@@ -99,10 +128,96 @@
                 }
             }
 
-            // =======================
-            // CAPTURE BUTTON
-            // =======================
+            // =======================================================
+            //  HELPER: SIMPAN RIWAYAT KE LOCAL STORAGE
+            // =======================================================
+            function saveToHistory(imageSrc, jenis, kategori, aiReply) {
+                let history = JSON.parse(localStorage.getItem("scan_history")) || [];
+
+                let newEntry = {
+                    image: imageSrc,
+                    jenis: jenis,
+                    kategori: kategori,
+                    jawaban_ai: aiReply,
+                    tanggal: new Date().toLocaleString()
+                };
+
+                history.unshift(newEntry);
+                localStorage.setItem("scan_history", JSON.stringify(history));
+            }
+
+            function fileToBase64(file) {
+                return new Promise((resolve) => {
+                    let reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // =======================================================
+            // VIEW SWITCH + ANIMASI
+            // =======================================================
+            function showResultView(imageSrc) {
+                // set gambar dulu
+                if (imageSrc) {
+                    resultLarge.src = imageSrc;
+                }
+
+                // hide camera
+                cameraWrap.classList.add('view-hide');
+                controlsArea.classList.add('view-hide');
+
+                setTimeout(() => {
+                    cameraWrap.style.display = 'none';
+                    controlsArea.style.display = 'none';
+
+                    resultView.style.display = 'block';
+                    // restart animasi
+                    resultView.classList.remove('view-hide');
+                    void resultView.offsetWidth;
+                    resultView.classList.add('view-show');
+                }, 120);
+            }
+
+            function hideResultView() {
+                resultView.classList.remove('view-show');
+                resultView.classList.add('view-hide');
+
+                setTimeout(() => {
+                    resultView.style.display = 'none';
+
+                    cameraWrap.style.display = 'block';
+                    controlsArea.style.display = 'flex';
+
+                    cameraWrap.classList.remove('view-hide');
+                    controlsArea.classList.remove('view-hide');
+
+                    void cameraWrap.offsetWidth;
+                    cameraWrap.classList.add('view-show');
+                    controlsArea.classList.add('view-show');
+                }, 120);
+            }
+
+            backBtn.addEventListener('click', () => {
+                hideResultView();
+            });
+
+            showHistoryBtn.addEventListener('click', () => {
+                window.location.href = '/riwayat';
+            });
+            gotoHistory.addEventListener('click', () => {
+                window.location.href = '/riwayat';
+            });
+
+
+            // =======================================================
+            //  CAPTURE BUTTON
+            // =======================================================
             captureBtn.addEventListener('click', async () => {
+
+                chatReplyBox.innerHTML = "";
+                resultText.innerHTML = "";
+
                 if (!video || video.readyState < 2)
                     return alert('Kamera belum siap.');
 
@@ -116,23 +231,18 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0, w, h);
 
-                // tampilkan preview
-                resultImg.src = canvas.toDataURL('image/png');
-                resultImg.style.display = 'block';
+                const base64Image = canvas.toDataURL('image/png');
 
-                // konversi ke Blob
+                // ==== LANGSUNG PINDAH KE RESULT VIEW DULU ====
+                resultText.innerHTML = "⏳ Memproses...";
+                chatReplyBox.innerHTML = "🤖 Sedang memproses jawaban...";
+                showResultView(base64Image);
+
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
 
-                // =======================
-                // SEND TO LARAVEL
-                // =======================
                 const formData = new FormData();
                 formData.append("image", blob, "capture.jpg");
                 formData.append("mode", currentMode);
-
-                const resultText = document.getElementById('resultText');
-                resultText.innerHTML = "⏳ Memproses...";
-                resultText.style.display = "block";
 
                 try {
                     const response = await fetch("/ai/process", {
@@ -140,83 +250,18 @@
                         body: formData
                     });
 
-                    const data = await response.json();
-                    console.log("HASIL AI:", data);
+                    const aiData = await response.json();
 
                     if (currentMode === "classify") {
-                        resultText.innerHTML = `
-                        <b>Jenis:</b> ${data.jenis} <br>
-                        <b>Kategori:</b> ${data.kategori}
-                    `;
-                    } else {
-                        if (data.count === 0) {
-                            resultText.innerHTML = "❌ Tidak ada sampah terdeteksi";
-                        } else {
-                            resultText.innerHTML = `
-                            <b>Terdeteksi ${data.count} sampah:</b><br>
-                            ${data.detections.map(
-                                d => `• ${d.class} (${(d.confidence * 100).toFixed(1)}%)`
-                            ).join("<br>")}
-                        `;
-                        }
-                    }
+                        resultText.innerHTML =
+                            `<b>Jenis:</b> ${aiData.jenis} <br> <b>Kategori:</b> ${aiData.kategori}`;
 
-                } catch (err) {
-                    console.error(err);
-                    resultText.innerHTML = "⚠️ Gagal memproses gambar";
-                }
-            });
+                        const autoMsg =
+                            `Aku nemu sampah kategori ${aiData.kategori} dengan jenis ${aiData.jenis}. Gimana cara ngolahnya?`;
 
+                        chatReplyBox.innerHTML = "🤖 Sedang memproses jawaban...";
 
-            // =======================
-            // UPLOAD FILE MANUAL
-            // =======================
-            const uploadBtn = document.getElementById('uploadBtn');
-            const imageInput = document.getElementById('imageInput');
-
-            uploadBtn.addEventListener('click', () => {
-                imageInput.click();
-            });
-
-            imageInput.addEventListener('change', async () => {
-                const file = imageInput.files[0];
-                if (!file) return;
-
-                resultImg.src = URL.createObjectURL(file);
-                resultImg.style.display = "block";
-
-                const formData = new FormData();
-                formData.append("image", file);
-                formData.append("mode", currentMode);
-
-                const resultText = document.getElementById('resultText');
-                resultText.innerHTML = "⏳ Memproses...";
-                resultText.style.display = "block";
-
-                const response = await fetch("/ai/process", {
-                    method: "POST",
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (currentMode === "classify") {
-
-                    resultText.innerHTML = `
-                        <b>Jenis:</b> ${data.jenis} <br>
-                        <b>Kategori:</b> ${data.kategori}
-                    `;
-
-                    // pesan otomatis
-                    const autoMsg =
-                        `Aku nemu sampah kategori ${data.kategori} dengan jenis ${data.jenis}. Gimana cara ngolahnya?`;
-
-                    const chatReplyBox = document.getElementById("aiChatReply");
-                    chatReplyBox.style.display = "block";
-                    chatReplyBox.innerHTML = "🤖 Sedang memproses jawaban...";
-
-                    // KIRIM KE CHATBOT
-                    fetch("/chatbot", {
+                        const chatRes = await fetch("/chatbot", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -225,34 +270,135 @@
                             body: JSON.stringify({
                                 message: autoMsg
                             })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            chatReplyBox.innerHTML = `
-                                <div class="p-3 rounded" style="background:#E8FFD8; border-left: 5px solid #6CC46C;">
-                                    <b>Pertanyaan:</b><br>
-                                    ${autoMsg}<br><br>
-
-                                    <b>Jawaban W.A.S.T.E AI:</b><br>
-                                    ${data.reply}
-                                </div>
-                            `;
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            chatReplyBox.innerHTML = "⚠️ Chatbot tidak bisa merespon sekarang.";
                         });
-                } else {
-                    if (data.count === 0) {
-                        resultText.innerHTML = "❌ Tidak ada sampah terdeteksi";
+
+                        const chatJson = await chatRes.json();
+                        const aiReply = chatJson.reply || "";
+
+                        chatReplyBox.innerHTML = `
+                    <div class="p-3 rounded" style="background:#E8FFD8; border-left:5px solid #6CC46C;">
+                        <b>Pertanyaan:</b><br>
+                        ${autoMsg}<br><br>
+                        <b>Jawaban W.A.S.T.E AI:</b><br>
+                        ${aiReply}
+                    </div>
+                `;
+
+                        saveToHistory(base64Image, aiData.jenis, aiData.kategori, aiReply);
+
                     } else {
-                        resultText.innerHTML = `
-                        <b>Terdeteksi ${data.count} sampah:</b><br>
-                        ${data.detections.map(
-                            d => `• ${d.class} (${(d.confidence * 100).toFixed(1)}%)`
-                        ).join("<br>")}
-                    `;
+                        let detectionsHtml = "";
+                        if (aiData.count && aiData.count > 0) {
+                            detectionsHtml = `<b>Terdeteksi ${aiData.count} sampah:</b><br>` +
+                                aiData.detections.map(
+                                    d => `• ${d.class} (${(d.confidence*100).toFixed(1)}%)`
+                                ).join("<br>");
+                        } else {
+                            detectionsHtml = "❌ Tidak ada sampah terdeteksi";
+                        }
+
+                        resultText.innerHTML = detectionsHtml;
+                        chatReplyBox.innerHTML = "";
+
+                        saveToHistory(base64Image, "deteksi", "-", detectionsHtml);
                     }
+
+                } catch (err) {
+                    console.error(err);
+                    resultText.innerHTML = "⚠️ Gagal memproses gambar";
+                    chatReplyBox.innerHTML = "";
+                }
+            });
+
+
+
+            // =======================================================
+            //  UPLOAD FILE
+            // =======================================================
+            uploadBtn.addEventListener('click', () => imageInput.click());
+
+            imageInput.addEventListener('change', async () => {
+
+                chatReplyBox.innerHTML = "";
+                resultText.innerHTML = "";
+
+                const file = imageInput.files[0];
+                if (!file) return;
+
+                const base64Image = await fileToBase64(file);
+
+                // langsung pindah tampilan
+                resultText.innerHTML = "⏳ Memproses...";
+                chatReplyBox.innerHTML = "🤖 Sedang memproses jawaban...";
+                showResultView(base64Image);
+
+                const formData = new FormData();
+                formData.append("image", file);
+                formData.append("mode", currentMode);
+
+                try {
+                    const response = await fetch("/ai/process", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const aiData = await response.json();
+
+                    if (currentMode === "classify") {
+                        resultText.innerHTML =
+                            `<b>Jenis:</b> ${aiData.jenis} <br> <b>Kategori:</b> ${aiData.kategori}`;
+
+                        const autoMsg =
+                            `Aku nemu sampah kategori ${aiData.kategori} dengan jenis ${aiData.jenis}. Gimana cara ngolahnya?`;
+
+                        chatReplyBox.innerHTML = "🤖 Sedang memproses jawaban...";
+
+                        const chatRes = await fetch("/chatbot", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                message: autoMsg
+                            })
+                        });
+
+                        const chatJson = await chatRes.json();
+                        const aiReply = chatJson.reply || "";
+
+                        chatReplyBox.innerHTML = `
+                    <div class="p-3 rounded" style="background:#E8FFD8; border-left:5px solid #6CC46C;">
+                        <b>Pertanyaan:</b><br>
+                        ${autoMsg}<br><br>
+                        <b>Jawaban W.A.S.T.E AI:</b><br>
+                        ${aiReply}
+                    </div>
+                `;
+
+                        saveToHistory(base64Image, aiData.jenis, aiData.kategori, aiReply);
+
+                    } else {
+                        let detectionsHtml = "";
+                        if (aiData.count && aiData.count > 0) {
+                            detectionsHtml = `<b>Terdeteksi ${aiData.count} sampah:</b><br>` +
+                                aiData.detections.map(
+                                    d => `• ${d.class} (${(d.confidence*100).toFixed(1)}%)`
+                                ).join("<br>");
+                        } else {
+                            detectionsHtml = "❌ Tidak ada sampah terdeteksi";
+                        }
+
+                        resultText.innerHTML = detectionsHtml;
+                        chatReplyBox.innerHTML = "";
+
+                        saveToHistory(base64Image, "deteksi", "-", detectionsHtml);
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    resultText.innerHTML = "⚠️ Gagal memproses gambar";
+                    chatReplyBox.innerHTML = "";
                 }
             });
 

@@ -10,7 +10,9 @@ class EdukasiController extends Controller
     {
         $modules = $this->loadModules();
 
-        return view('edukasi.index', compact('modules'));
+        return view('edukasi.index', compact('modules'), [
+            'title' => 'WASTE — Edukasi'
+        ]);
     }
 
     public function show($slug)

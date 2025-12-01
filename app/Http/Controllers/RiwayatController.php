@@ -13,9 +13,12 @@ class RiwayatController extends Controller
         if (!File::exists($path)) {
             $riwayat = [];
         } else {
-            $riwayat = json_decode(File::get($path), true);
+            $json = File::get($path);
+            $riwayat = json_decode($json, true);
         }
 
-        return view('riwayat.index', compact('riwayat'));
+        return view('riwayat.index', compact('riwayat'), [
+            'title' => 'WASTE — Riwayat Scan'
+        ]);
     }
 }

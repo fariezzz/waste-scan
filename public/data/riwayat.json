@@ -1,16 +1,1 @@
-[
-    {
-        "id": 1,
-        "tanggal": "2025-11-01",
-        "jenis": "Deteksi",
-        "hasil": "Sampah ini merupakan sampah kulit pisang bertipe organik, sehingga mudah membusuk dan dapat dijadikan kompos.",
-        "gambar": null
-    },
-    {
-        "id": 2,
-        "tanggal": "2025-11-02",
-        "jenis": "Klasifikasi",
-        "hasil": "Botol plastik termasuk sampah anorganik yang dapat didaur ulang.",
-        "gambar": null
-    }
-]
+[]

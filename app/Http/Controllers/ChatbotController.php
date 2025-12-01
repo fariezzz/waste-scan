@@ -9,7 +9,9 @@ class ChatbotController extends Controller
 {
     public function index()
     {
-        return view('chatbot.index');
+        return view('chatbot.index', [
+            'title' => 'WASTE — Chatbot'
+        ]);
     }
 
     public function chat(Request $request)
