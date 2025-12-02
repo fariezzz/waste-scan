@@ -9,11 +9,7 @@ from io import BytesIO
 
 app = FastAPI()
 
-# ============================
-# LOAD YOLO MODEL (sekali)
-# ============================
 yolo_model = YOLO("deep-learning/models/best.pt")
-
 
 @app.post("/detect")
 async def detect(image: UploadFile = File(...)):
