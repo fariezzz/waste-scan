@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, UploadFile, File
 import torch
 from ultralytics import YOLO
@@ -10,6 +11,14 @@ from io import BytesIO
 app = FastAPI()
 
 yolo_model = YOLO("deep-learning/models/best.pt")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/detect")
 async def detect(image: UploadFile = File(...)):
