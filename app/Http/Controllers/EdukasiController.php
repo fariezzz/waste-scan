@@ -24,6 +24,7 @@ class EdukasiController extends Controller
         if (!$module) abort(404);
 
         return view('edukasi.detail', [
+            'title' => 'WASTE — ' . $module['title'],
             'module' => $module,
             'contentView' => $module['view']
         ]);

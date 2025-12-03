@@ -1,16 +1,14 @@
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, UploadFile, File
-import torch
+from fastapi.middleware.cors import CORSMiddleware
 from ultralytics import YOLO
+from ensemble import classify_image
 from PIL import Image
 import numpy as np
-from ensemble import classify_image
-from fastapi import Request
 from io import BytesIO
 
-app = FastAPI()
+print("🔥 FastAPI Loaded Successfully")
 
-yolo_model = YOLO("deep-learning/models/best.pt")
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,26 +18,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+yolo_model = YOLO("deep-learning/models/best.pt")
+
+@app.get("/")
+def root():
+    return {"message": "API is running"}
+
 @app.post("/detect")
 async def detect(image: UploadFile = File(...)):
     content = await image.read()
     img = Image.open(BytesIO(content)).convert("RGB")
     img = np.array(img)
 
-    results = yolo_model(img, verbose=False)[0]
+    results = yolo_model.predict(img, verbose=False)[0]
+
     detections = []
 
-    if results.boxes is not None:
-        for box in results.boxes:
-            x1, y1, x2, y2 = box.xyxy[0].tolist()
-            cls = int(box.cls[0])
-            conf = float(box.conf[0])
-            class_name = yolo_model.names[cls]
-
+    if results.boxes is not None and len(results.boxes) > 0:
+        for *xyxy, conf, cls in results.boxes.data.tolist():
             detections.append({
-                "class": class_name,
-                "confidence": conf,
-                "box": [x1, y1, x2, y2]
+                "class": yolo_model.names[int(cls)],
+                "confidence": float(conf),
+                "box": xyxy
             })
 
     return {
@@ -57,8 +57,4 @@ async def classify(image: UploadFile = File(...)):
     img.save(img_path)
 
     jenis, kategori = classify_image(img_path)
-
-    return {
-        "jenis": jenis,
-        "kategori": kategori
-    }
+    return {"jenis": jenis, "kategori": kategori}

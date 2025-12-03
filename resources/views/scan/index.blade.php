@@ -66,58 +66,54 @@
             let currentMode = "classify";
 
             function updateModeUI() {
-                if (currentMode === "classify") {
-                    modeClassify.classList.add("active");
-                    modeDetect.classList.remove("active");
-                } else {
-                    modeDetect.classList.add("active");
-                    modeClassify.classList.remove("active");
-                }
+                modeClassify.classList.toggle("active", currentMode === "classify");
+                modeDetect.classList.toggle("active", currentMode !== "classify");
             }
 
-            modeClassify.addEventListener('click', () => {
+            modeClassify.onclick = () => {
                 currentMode = "classify";
                 updateModeUI();
-            });
-
-            modeDetect.addEventListener('click', () => {
+            };
+            modeDetect.onclick = () => {
                 currentMode = "detect";
                 updateModeUI();
-            });
-
+            };
             updateModeUI();
 
-
             // =======================
-            // ELEM
+            // ELEMENTS
             // =======================
             const video = document.getElementById('camera');
             const captureBtn = document.getElementById('captureButton');
             const uploadBtn = document.getElementById('uploadBtn');
             const imageInput = document.getElementById('imageInput');
-            const controlsArea = document.getElementById('controlsArea');
+
             const cameraWrap = document.getElementById('cameraWrap');
+            const controlsArea = document.getElementById('controlsArea');
 
             const resultView = document.getElementById('resultView');
             const resultLarge = document.getElementById('resultLarge');
             const resultText = document.getElementById('resultText');
             const chatReplyBox = document.getElementById('aiChatReply');
             const backBtn = document.getElementById('backToCamera');
-            const showHistoryBtn = document.getElementById('showHistoryBtn');
             const gotoHistory = document.getElementById('gotoHistory');
+            const showHistoryBtn = document.getElementById('showHistoryBtn');
 
+            // =======================
+            // CAMERA INIT
+            // =======================
             let stream = null;
 
             async function startCamera() {
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({
                         video: {
-                            facingMode: 'environment'
+                            facingMode: "environment"
                         }
                     });
                     video.srcObject = stream;
-                } catch (err) {
-                    alert('Gagal mengakses kamera.');
+                } catch (e) {
+                    alert("Gagal mengakses kamera.");
                 }
             }
 
@@ -128,51 +124,68 @@
                 }
             }
 
-            // =======================================================
-            //  HELPER: SIMPAN RIWAYAT KE LOCAL STORAGE
-            // =======================================================
-            function saveToHistory(imageSrc, jenis, kategori, aiReply) {
-                let history = JSON.parse(localStorage.getItem("scan_history")) || [];
+            // =======================
+            // RESIZE UTILITY
+            // =======================
+            function resizeImageFile(file, maxSize = 800) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
 
-                let newEntry = {
-                    image: imageSrc,
-                    jenis: jenis,
-                    kategori: kategori,
-                    jawaban_ai: aiReply,
-                    tanggal: new Date().toLocaleString()
-                };
+                            let {
+                                width,
+                                height
+                            } = img;
 
-                history.unshift(newEntry);
-                localStorage.setItem("scan_history", JSON.stringify(history));
-            }
+                            if (width > height && width > maxSize) {
+                                height = height * (maxSize / width);
+                                width = maxSize;
+                            } else if (height > width && height > maxSize) {
+                                width = width * (maxSize / height);
+                                height = maxSize;
+                            }
 
-            function fileToBase64(file) {
-                return new Promise((resolve) => {
-                    let reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
+                            const canvas = document.createElement("canvas");
+                            canvas.width = width;
+                            canvas.height = height;
+
+                            const ctx = canvas.getContext("2d");
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            canvas.toBlob(blob => resolve(blob), "image/jpeg", 0.85);
+                        };
+                        img.onerror = reject;
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = reject;
                     reader.readAsDataURL(file);
                 });
             }
 
-            // =======================================================
-            // VIEW SWITCH + ANIMASI
-            // =======================================================
-            function showResultView(imageSrc) {
-                // set gambar dulu
-                if (imageSrc) {
-                    resultLarge.src = imageSrc;
-                }
+            function fileToBase64(file) {
+                return new Promise(res => {
+                    const r = new FileReader();
+                    r.onload = () => res(r.result);
+                    r.readAsDataURL(file);
+                });
+            }
 
-                // hide camera
+            // =======================
+            // VIEW ANIMATION
+            // =======================
+            function showResultView(imageSrc) {
+                if (imageSrc) resultLarge.src = imageSrc;
+
                 cameraWrap.classList.add('view-hide');
                 controlsArea.classList.add('view-hide');
 
                 setTimeout(() => {
                     cameraWrap.style.display = 'none';
                     controlsArea.style.display = 'none';
-
                     resultView.style.display = 'block';
-                    // restart animasi
+
                     resultView.classList.remove('view-hide');
                     void resultView.offsetWidth;
                     resultView.classList.add('view-show');
@@ -198,69 +211,82 @@
                 }, 120);
             }
 
-            backBtn.addEventListener('click', () => {
-                hideResultView();
-            });
+            backBtn.onclick = hideResultView;
+            showHistoryBtn.onclick = () => window.location.href = "/riwayat";
+            gotoHistory.onclick = () => window.location.href = "/riwayat";
 
-            showHistoryBtn.addEventListener('click', () => {
-                window.location.href = '/riwayat';
-            });
-            gotoHistory.addEventListener('click', () => {
-                window.location.href = '/riwayat';
-            });
+            // =======================
+            // HISTORY SYSTEM — FINAL STRUCTURE
+            // =======================
+            function saveToHistory(entry) {
+                let history = JSON.parse(localStorage.getItem("scan_history")) || [];
+                history.unshift(entry);
+                localStorage.setItem("scan_history", JSON.stringify(history));
+            }
 
-
-            // =======================================================
-            //  CAPTURE BUTTON
-            // =======================================================
-            captureBtn.addEventListener('click', async () => {
-
+            // =======================
+            // CAPTURE BUTTON
+            // =======================
+            captureBtn.onclick = async () => {
                 chatReplyBox.innerHTML = "";
                 resultText.innerHTML = "";
 
-                if (!video || video.readyState < 2)
-                    return alert('Kamera belum siap.');
+                if (!video || video.readyState < 2) return alert("Kamera belum siap.");
 
-                const canvas = document.createElement('canvas');
-                const w = video.videoWidth || 1280;
-                const h = video.videoHeight || 720;
+                // capture canvas
+                const canvas = document.createElement("canvas");
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
 
-                canvas.width = w;
-                canvas.height = h;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(video, 0, 0);
 
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, w, h);
+                // resize for upload
+                const resizedBlob = await new Promise(resolve =>
+                    canvas.toBlob(resolve, "image/jpeg", 0.85)
+                );
+                const base64Image = await fileToBase64(resizedBlob);
 
-                const base64Image = canvas.toDataURL('image/png');
-
-                // ==== LANGSUNG PINDAH KE RESULT VIEW DULU ====
+                // show UI
                 resultText.innerHTML = "⏳ Memproses...";
-                chatReplyBox.innerHTML = "🤖 Sedang memproses jawaban...";
+                chatReplyBox.innerHTML = currentMode === "classify" ?
+                    "🤖 Sedang memproses jawaban..." :
+                    "";
                 showResultView(base64Image);
 
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
-
                 const formData = new FormData();
-                formData.append("image", blob, "capture.jpg");
+                formData.append("image", resizedBlob, "capture.jpg");
                 formData.append("mode", currentMode);
 
+                let aiData = null;
                 try {
-                    const response = await fetch("/ai/process", {
+                    const res = await fetch("/ai/process", {
                         method: "POST",
                         body: formData
                     });
+                    aiData = await res.json();
+                } catch (err) {
+                    resultText.innerHTML = "⚠️ Gagal memproses gambar (server).";
+                    chatReplyBox.innerHTML = "";
+                    return;
+                }
 
-                    const aiData = await response.json();
+                // =====================
+                // CLASSIFY
+                // =====================
+                if (currentMode === "classify") {
+                    const autoMsg =
+                        `Aku nemu sampah kategori ${aiData.kategori} dengan jenis ${aiData.jenis}. ` +
+                        `Gimana cara mengolahnya?`;
 
-                    if (currentMode === "classify") {
-                        resultText.innerHTML =
-                            `<b>Jenis:</b> ${aiData.jenis} <br> <b>Kategori:</b> ${aiData.kategori}`;
+                    resultText.innerHTML =
+                        `<b>Jenis:</b> ${aiData.jenis}<br><b>Kategori:</b> ${aiData.kategori}`;
 
-                        const autoMsg =
-                            `Aku nemu sampah kategori ${aiData.kategori} dengan jenis ${aiData.jenis}. Gimana cara ngolahnya?`;
+                    let chatJson = {
+                        reply: "Maaf, AI sedang tidak bisa dihubungi."
+                    };
 
-                        chatReplyBox.innerHTML = "🤖 Sedang memproses jawaban...";
-
+                    try {
                         const chatRes = await fetch("/chatbot", {
                             method: "POST",
                             headers: {
@@ -271,89 +297,103 @@
                                 message: autoMsg
                             })
                         });
+                        chatJson = await chatRes.json();
+                    } catch {}
 
-                        const chatJson = await chatRes.json();
-                        const aiReply = chatJson.reply || "";
+                    chatReplyBox.innerHTML = `
+                <div class="p-3 rounded" style="background:#E8FFD8;border-left:5px solid #6CC46C;">
+                    <b>Pertanyaan:</b><br>${autoMsg}<br><br>
+                    <b>Jawaban W.A.S.T.E AI:</b><br>${chatJson.reply}
+                </div>
+            `;
 
-                        chatReplyBox.innerHTML = `
-                    <div class="p-3 rounded" style="background:#E8FFD8; border-left:5px solid #6CC46C;">
-                        <b>Pertanyaan:</b><br>
-                        ${autoMsg}<br><br>
-                        <b>Jawaban W.A.S.T.E AI:</b><br>
-                        ${aiReply}
-                    </div>
-                `;
+                    saveToHistory({
+                        image: base64Image,
+                        jenis_scan: "Klasifikasi",
+                        jenis_sampah: aiData.jenis,
+                        kategori_sampah: aiData.kategori,
+                        hasil_ai: chatJson.reply,
+                        tanggal: new Date().toLocaleString()
+                    });
+                }
 
-                        saveToHistory(base64Image, aiData.jenis, aiData.kategori, aiReply);
+                // =====================
+                // DETECTION
+                // =====================
+                else {
+                    let detectionsHtml = "";
 
+                    if (aiData.count > 0) {
+                        detectionsHtml =
+                            `<b>Terdeteksi ${aiData.count} sampah:</b><br>` +
+                            aiData.detections
+                            .map(d => `• ${d.class} (${(d.confidence * 100).toFixed(1)}%)`)
+                            .join("<br>");
                     } else {
-                        let detectionsHtml = "";
-                        if (aiData.count && aiData.count > 0) {
-                            detectionsHtml = `<b>Terdeteksi ${aiData.count} sampah:</b><br>` +
-                                aiData.detections.map(
-                                    d => `• ${d.class} (${(d.confidence*100).toFixed(1)}%)`
-                                ).join("<br>");
-                        } else {
-                            detectionsHtml = "❌ Tidak ada sampah terdeteksi";
-                        }
-
-                        resultText.innerHTML = detectionsHtml;
-                        chatReplyBox.innerHTML = "";
-
-                        saveToHistory(base64Image, "deteksi", "-", detectionsHtml);
+                        detectionsHtml = "❌ Tidak ada sampah terdeteksi";
                     }
 
-                } catch (err) {
-                    console.error(err);
-                    resultText.innerHTML = "⚠️ Gagal memproses gambar";
+                    resultText.innerHTML = detectionsHtml;
                     chatReplyBox.innerHTML = "";
+
+                    saveToHistory({
+                        image: base64Image,
+                        jenis_scan: "Deteksi",
+                        jenis_sampah: "-",
+                        kategori_sampah: "-",
+                        hasil_ai: detectionsHtml,
+                        tanggal: new Date().toLocaleString()
+                    });
                 }
-            });
+            };
 
+            // =======================
+            // UPLOAD SYSTEM
+            // =======================
+            uploadBtn.onclick = () => imageInput.click();
 
-
-            // =======================================================
-            //  UPLOAD FILE
-            // =======================================================
-            uploadBtn.addEventListener('click', () => imageInput.click());
-
-            imageInput.addEventListener('change', async () => {
-
-                chatReplyBox.innerHTML = "";
-                resultText.innerHTML = "";
-
+            imageInput.onchange = async () => {
                 const file = imageInput.files[0];
                 if (!file) return;
 
-                const base64Image = await fileToBase64(file);
+                const resizedBlob = await resizeImageFile(file);
+                const base64 = await fileToBase64(resizedBlob);
 
-                // langsung pindah tampilan
                 resultText.innerHTML = "⏳ Memproses...";
-                chatReplyBox.innerHTML = "🤖 Sedang memproses jawaban...";
-                showResultView(base64Image);
+                chatReplyBox.innerHTML = currentMode === "classify" ? "🤖 Sedang memproses jawaban..." : "";
+                showResultView(base64);
 
-                const formData = new FormData();
-                formData.append("image", file);
-                formData.append("mode", currentMode);
+                const fd = new FormData();
+                fd.append("image", resizedBlob, "upload.jpg");
+                fd.append("mode", currentMode);
 
+                let aiData = null;
                 try {
-                    const response = await fetch("/ai/process", {
+                    const res = await fetch("/ai/process", {
                         method: "POST",
-                        body: formData
+                        body: fd
                     });
+                    aiData = await res.json();
+                } catch {
+                    resultText.innerHTML = "⚠️ Gagal memproses gambar";
+                    chatReplyBox.innerHTML = "";
+                    return;
+                }
 
-                    const aiData = await response.json();
+                // CLASSIFY
+                if (currentMode === "classify") {
+                    resultText.innerHTML =
+                        `<b>Jenis:</b> ${aiData.jenis}<br><b>Kategori:</b> ${aiData.kategori}`;
 
-                    if (currentMode === "classify") {
-                        resultText.innerHTML =
-                            `<b>Jenis:</b> ${aiData.jenis} <br> <b>Kategori:</b> ${aiData.kategori}`;
+                    const autoMsg =
+                        `Aku nemu sampah kategori ${aiData.kategori} dengan jenis ${aiData.jenis}. Gimana cara mengolahnya?`;
 
-                        const autoMsg =
-                            `Aku nemu sampah kategori ${aiData.kategori} dengan jenis ${aiData.jenis}. Gimana cara ngolahnya?`;
+                    let chatJson = {
+                        reply: "AI tidak dapat dihubungi."
+                    };
 
-                        chatReplyBox.innerHTML = "🤖 Sedang memproses jawaban...";
-
-                        const chatRes = await fetch("/chatbot", {
+                    try {
+                        const resChat = await fetch("/chatbot", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -363,44 +403,49 @@
                                 message: autoMsg
                             })
                         });
+                        chatJson = await resChat.json();
+                    } catch {}
 
-                        const chatJson = await chatRes.json();
-                        const aiReply = chatJson.reply || "";
+                    chatReplyBox.innerHTML = `
+                <div class="p-3 rounded" style="background:#E8FFD8;border-left:5px solid #6CC46C;">
+                    <b>Pertanyaan:</b><br>${autoMsg}<br><br>
+                    <b>Jawaban W.A.S.T.E AI:</b><br>${chatJson.reply}
+                </div>
+            `;
 
-                        chatReplyBox.innerHTML = `
-                    <div class="p-3 rounded" style="background:#E8FFD8; border-left:5px solid #6CC46C;">
-                        <b>Pertanyaan:</b><br>
-                        ${autoMsg}<br><br>
-                        <b>Jawaban W.A.S.T.E AI:</b><br>
-                        ${aiReply}
-                    </div>
-                `;
-
-                        saveToHistory(base64Image, aiData.jenis, aiData.kategori, aiReply);
-
-                    } else {
-                        let detectionsHtml = "";
-                        if (aiData.count && aiData.count > 0) {
-                            detectionsHtml = `<b>Terdeteksi ${aiData.count} sampah:</b><br>` +
-                                aiData.detections.map(
-                                    d => `• ${d.class} (${(d.confidence*100).toFixed(1)}%)`
-                                ).join("<br>");
-                        } else {
-                            detectionsHtml = "❌ Tidak ada sampah terdeteksi";
-                        }
-
-                        resultText.innerHTML = detectionsHtml;
-                        chatReplyBox.innerHTML = "";
-
-                        saveToHistory(base64Image, "deteksi", "-", detectionsHtml);
-                    }
-
-                } catch (err) {
-                    console.error(err);
-                    resultText.innerHTML = "⚠️ Gagal memproses gambar";
-                    chatReplyBox.innerHTML = "";
+                    saveToHistory({
+                        image: base64,
+                        jenis_scan: "Klasifikasi",
+                        jenis_sampah: aiData.jenis,
+                        kategori_sampah: aiData.kategori,
+                        hasil_ai: chatJson.reply,
+                        tanggal: new Date().toLocaleString()
+                    });
                 }
-            });
+
+                // DETECT
+                else {
+                    const detectionsHtml =
+                        aiData.count > 0 ?
+                        `<b>Terdeteksi ${aiData.count} sampah:</b><br>` +
+                        aiData.detections
+                        .map(d => `• ${d.class} (${(d.confidence * 100).toFixed(1)}%)`)
+                        .join("<br>") :
+                        "❌ Tidak ada sampah terdeteksi";
+
+                    resultText.innerHTML = detectionsHtml;
+                    chatReplyBox.innerHTML = "";
+
+                    saveToHistory({
+                        image: base64,
+                        jenis_scan: "Deteksi",
+                        jenis_sampah: "-",
+                        kategori_sampah: "-",
+                        hasil_ai: detectionsHtml,
+                        tanggal: new Date().toLocaleString()
+                    });
+                }
+            };
 
             startCamera();
             window.addEventListener('beforeunload', stopCamera);

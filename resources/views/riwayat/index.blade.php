@@ -16,10 +16,12 @@
                     <tr>
                         <td>No.</td>
                         <td>Tanggal</td>
-                        <td>Jenis</td>
+                        <td>Jenis Scan</td>
+                        <td>Jenis Sampah</td>
                         <td>Aksi</td>
                     </tr>
                 </thead>
+
 
                 <tbody id="riwayatBody">
                     {{-- Akan diisi JavaScript --}}
@@ -83,7 +85,6 @@
     </div>
 @endsection
 
-
 @push('script')
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -106,82 +107,76 @@
                 clearAllBtn.classList.remove("d-none");
             }
 
-            // Tampilkan data ke tabel
+            // Build Table
             history.forEach((item, index) => {
 
                 let row = `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${item.tanggal}</td>
-                    <td>${item.jenis}</td>
+        <tr>
+            <td>${index + 1}</td>
+            <td>${item.tanggal}</td>
+            <td>${item.jenis_scan}</td>
+            <td>${item.jenis_sampah}</td>
 
-                    <td>
-                        <button 
-                            class="btn p-0 openDetail"
-                            data-index="${index}"
-                            data-no="${index + 1}"
-                            data-tanggal="${item.tanggal}"
-                            data-hasil="Jenis: ${item.jenis}\nKategori: ${item.kategori}\n\nAI: ${item.jawaban_ai}"
-                            data-gambar="${item.image}"
-                            data-bs-toggle="modal"
-                            data-bs-target="#detailModal"
-                        >
-                            <i class="bi bi-info-circle fs-5 text-primary"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
+            <td>
+                <button 
+                    class="btn p-0 openDetail"
+                    data-index="${index}"
+                    data-no="${index + 1}"
+                    data-tanggal="${item.tanggal}"
+                    data-scan="${item.jenis_scan}"
+                    data-jenis="${item.jenis_sampah}"
+                    data-kategori="${item.kategori_sampah}"
+                    data-ai="${item.hasil_ai}"
+                    data-gambar="${item.image}"
+                    data-bs-toggle="modal"
+                    data-bs-target="#detailModal"
+                >
+                    <i class="bi bi-info-circle fs-5 text-primary"></i>
+                </button>
+            </td>
+        </tr>
+    `;
 
                 body.insertAdjacentHTML("beforeend", row);
             });
 
-
-            // Ketika tombol Detail diklik
+            // Detail Handler
             document.querySelectorAll(".openDetail").forEach(btn => {
-                btn.addEventListener("click", () => {
+                btn.onclick = () => {
 
-                    document.getElementById("modalNo").textContent = btn.getAttribute("data-no");
-                    document.getElementById("modalTanggal").textContent = btn.getAttribute(
-                        "data-tanggal");
+                    document.getElementById("modalNo").innerText = btn.dataset.no;
+                    document.getElementById("modalTanggal").innerText = btn.dataset.tanggal;
 
-                    let hasil = btn.getAttribute("data-hasil").replace(/\n/g, "<br>");
-                    document.getElementById("modalHasil").innerHTML = hasil;
+                    const hasilHtml = `
+                <b>Jenis Scan:</b> ${btn.dataset.scan}<br>
+                <b>Jenis Sampah:</b> ${btn.dataset.jenis}<br>
+                <b>Kategori:</b> ${btn.dataset.kategori}<br><br>
+                <b>Hasil AI:</b><br>${btn.dataset.ai}
+            `;
 
-                    let gambar = btn.getAttribute("data-gambar");
-                    let img = document.getElementById("modalGambar");
+                    document.getElementById("modalHasil").innerHTML = hasilHtml;
 
-                    img.src = gambar;
+                    const img = document.getElementById("modalGambar");
+                    img.src = btn.dataset.gambar;
                     img.style.display = "block";
 
-                    const index = parseInt(btn.getAttribute("data-index"));
-
                     document.getElementById("btnHapus").onclick = () => {
-                        hapusRiwayat(index);
+                        hapusRiwayat(parseInt(btn.dataset.index));
                     };
-                });
+                };
             });
 
-            // ==== TOMBOL HAPUS SEMUA → TAMPILKAN MODAL CUSTOM ====
-            clearAllBtn.addEventListener("click", () => {
-                clearModal.classList.remove("d-none");
-            });
+            // Modal "hapus semua"
+            clearAllBtn.onclick = () => clearModal.classList.remove("d-none");
+            cancelClearBtn.onclick = () => clearModal.classList.add("d-none");
 
-            // Batal hapus semua
-            cancelClearBtn.addEventListener("click", () => {
+            confirmClearBtn.onclick = () => {
                 clearModal.classList.add("d-none");
-            });
-
-            // Konfirmasi hapus semua
-            confirmClearBtn.addEventListener("click", () => {
-                clearModal.classList.add("d-none");
-
                 localStorage.removeItem("scan_history");
-
                 body.innerHTML = "";
                 emptyMsg.classList.remove("d-none");
                 clearAllBtn.classList.add("d-none");
-            });
-
+            };
         });
 
         function hapusRiwayat(index) {
