@@ -14,6 +14,12 @@ body {
     -ms-overflow-style: none;
 }
 
+@media (max-width: 768px) {
+    .mb-10 {
+        margin-bottom: 5rem !important;
+    }
+}
+
 .bootstrap-wrap * {
     font-family: inherit;
 }
@@ -97,42 +103,146 @@ body {
     }
 }
 
+.carousel-wrapper {
+    width: 100%;
+    overflow: hidden;
+    padding: 20px 0;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 14px;
+    flex-wrap: nowrap;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.carousel-card {
+    flex-shrink: 0;
+    width: 280px;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    transition: transform .3s ease;
+}
+
+.carousel-card img {
+    width: 100%;
+    aspect-ratio: 16/7;
+    object-fit: cover;
+    display: block;
+    transition: transform .3s ease;
+}
+
+.carousel-card:hover img {
+    transform: scale(1.07);
+}
+
 /* ===== HERO SECTION ===== */
 .hero-section {
-    height: 45vh;
-    /* tinggi hero */
+    height: 36vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
+@media (max-width: 768px) {
+    .hero-section {
+        height: 30vh;
+    }
+}
+
 .hero-title {
-    font-weight: 700;
-    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    font-size: 3.4rem;
     color: #2e7d32;
     margin-bottom: 8px;
     letter-spacing: 2px;
 }
 
 .hero-line {
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: 600;
 }
 
 .hero-line-2 {
-    font-size: 1rem;
+    font-size: 1.25rem;
     margin-top: -6px;
 }
 
-/* responsive tweak */
 @media (max-width: 768px) {
     .hero-title {
         font-size: 1.8rem;
     }
 }
 
-#cameraPreview, #resultLarge {
+.info-text {
+    font-size: .9rem;
+    color: #555;
+}
+
+.wave-divider svg {
+    width: 100%;
+    margin-top: -20px;
+}
+
+.feature-box {
+    background: #f1fff4;
+    padding: 18px;
+    border-radius: 14px;
+    transition: .25s;
+}
+
+.feature-box:hover {
+    transform: translateY(-4px);
+    background: #e7ffe9;
+}
+
+.feature-icon {
+    width: 40px;
+    opacity: 0.8;
+    margin-bottom: 6px;
+}
+
+.about-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2f7a3d;
+}
+
+.about-desc {
+    max-width: 600px;
+    margin: 0 auto;
+    color: #444;
+}
+
+.cta-box {
+    background: #e9ffe9;
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.cta-title {
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.cta-desc {
+    font-size: 15px;
+    color: #333;
+}
+
+.footer {
+    color: #4a4a4a;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+
+#cameraPreview,
+#resultLarge {
     width: 100%;
     height: 55vh;
     background: #000;
@@ -183,17 +293,17 @@ body {
     gap: 18px;
     padding: 14px;
     align-items: flex-start;
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .result-image-wrap {
     width: 40%;
     min-width: 160px;
     max-width: 260px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
     background: #fafafa;
     border-radius: 10px;
 }
@@ -211,9 +321,19 @@ body {
     padding-right: 6px;
 }
 
-.result-main b { font-size: 1.05rem; }
-.result-detections { font-size: 0.95rem; color:#333; }
-.result-detections ul { padding-left: 18px; margin: 6px 0; }
+.result-main b {
+    font-size: 1.05rem;
+}
+
+.result-detections {
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.result-detections ul {
+    padding-left: 18px;
+    margin: 6px 0;
+}
 
 .ai-chat-box {
     background: #E8FFD8;
@@ -222,31 +342,48 @@ body {
     border-radius: 8px;
 }
 
-.ai-chat-content { white-space: pre-wrap; color:#163616; }
-.ai-chat-actions { margin-top:8px; text-align:right; }
+.ai-chat-content {
+    white-space: pre-wrap;
+    color: #163616;
+}
 
-.result-actions { display:flex; gap:8px; align-items:center; }
+.ai-chat-actions {
+    margin-top: 8px;
+    text-align: right;
+}
+
+.result-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
 
 /* Spinner overlay */
 .result-overlay-spinner {
-    position:absolute;
+    position: absolute;
     inset: 0;
     display: none;
-    justify-content:center;
-    align-items:center;
-    background: rgba(255,255,255,0.6);
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.6);
     z-index: 30;
 }
+
 .result-overlay-spinner::after {
     content: "";
-    width:44px;
-    height:44px;
-    border-radius:50%;
-    border:5px solid rgba(0,0,0,0.08);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 5px solid rgba(0, 0, 0, 0.08);
     border-top-color: #6CC46C;
     animation: spin 0.9s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 /* Toast */
 .toast-notice {
@@ -254,27 +391,31 @@ body {
     bottom: 22px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0,0,0,0.85);
+    background: rgba(0, 0, 0, 0.85);
     color: #fff;
     padding: 10px 14px;
     border-radius: 12px;
-    display:flex;
-    gap:12px;
-    align-items:center;
-    z-index:1200;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    z-index: 1200;
     font-size: .95rem;
 }
+
 .toast-undo {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     color: #fff;
-    border:none;
-    padding:6px 10px;
-    border-radius:8px;
-    cursor:pointer;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
 /* Disable pointer when processing */
-.processing { pointer-events: none; opacity: 0.85; }
+.processing {
+    pointer-events: none;
+    opacity: 0.85;
+}
 
 
 .mode-switch {
@@ -341,11 +482,13 @@ body {
     align-items: center;
 
     object-fit: contain;
-    padding: 0; /* penting */
+    padding: 0;
+    /* penting */
 }
 
 .control-btn .icon img {
-    width: 28px;  /* adjust freely */
+    width: 28px;
+    /* adjust freely */
     height: 28px;
 }
 
@@ -634,9 +777,10 @@ table thead td:last-child {
 
 /* Tombol hapus */
 .header-delete {
-    width: 90px; 
+    width: 90px;
     text-align: right;
 }
+
 .hapus-btn {
     background: none;
     border: none;

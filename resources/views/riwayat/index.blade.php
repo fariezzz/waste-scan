@@ -1,5 +1,5 @@
 @extends('layouts.main')
-
+@section('bodyClass', 'mb-10')
 @section('content')
     <div class="container mt-4">
         <h2 class="mb-3 text-center" style="font-size: 2rem">RIWAYAT<br>S C A N</h2>

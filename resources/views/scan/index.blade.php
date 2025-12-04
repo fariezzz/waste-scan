@@ -1,5 +1,5 @@
 @extends('layouts.main')
-@section('bodyClass', 'no-scroll-desktop')
+@section('bodyClass', 'mb-10')
 @section('content')
     <div id="cameraWrap">
         <div id="cameraPreview">

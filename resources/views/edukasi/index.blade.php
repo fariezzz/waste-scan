@@ -1,5 +1,5 @@
 @extends('layouts.main')
-
+@section('bodyClass', 'mb-10')
 @section('content')
     <div class="edu-wrapper container mt-4">
 
