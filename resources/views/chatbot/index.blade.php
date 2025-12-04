@@ -1,5 +1,5 @@
 @extends('layouts.main')
-
+@section('bodyClass', 'mb-10')
 @section('content')
     <div class="chatbot-page container d-flex flex-column justify-content-center align-items-center">
 
