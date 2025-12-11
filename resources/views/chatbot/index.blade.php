@@ -51,7 +51,7 @@
 @push('script')
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-
+            const bodyClassMap = document.body.classList;
             const messageInput = document.getElementById("chat-input");
             const sendBtn = document.getElementById("chat-send-btn");
             const chatBody = document.getElementById("chat-body");
@@ -67,6 +67,7 @@
 
             if (firstMessageSent) {
                 welcomeBox.classList.add("d-none");
+                bodyClassMap.add("mb-10");
                 resetBtn.classList.remove("d-none")
             }
 
@@ -103,6 +104,7 @@
                 if (!firstMessageSent) {
                     firstMessageSent = true;
                     welcomeBox.classList.add("d-none");
+                    bodyClassMap.add("mb-10");
                     resetBtn.classList.remove("d-none")
                 }
 
@@ -130,21 +132,17 @@
                 resetBtn.classList.remove("d-none");
             }
 
-            // Show modal
             resetBtn.addEventListener("click", () => {
                 resetModal.classList.remove("d-none");
             });
 
-            // Close modal
             cancelReset.addEventListener("click", () => {
                 resetModal.classList.add("d-none");
             });
 
-            // Confirm reset
             confirmReset.addEventListener("click", () => {
                 resetModal.classList.add("d-none");
 
-                // Bubble fade-out
                 const bubbles = document.querySelectorAll(".bubble");
                 bubbles.forEach(b => b.classList.add("fade-out"));
 
@@ -152,6 +150,7 @@
                     chatBody.innerHTML = "";
                     localStorage.removeItem("chat_history");
                     welcomeBox.classList.remove("d-none");
+                    bodyClassMap.remove("mb-10");
                     firstMessageSent = false;
                     resetBtn.classList.add("d-none");
                 }, 250);

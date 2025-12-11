@@ -20,7 +20,6 @@
                     <img src="{{ asset('icons/upload.svg') }}" alt="Logo">
                 </div>
 
-                {{-- <i class="bi bi-upload icon"></i> --}}
                 <input type="file" id="imageInput" accept="image/*" style="display:none;">
             </div>
 
@@ -32,7 +31,6 @@
                     <img src="{{ asset('icons/riwayat.svg') }}" alt="Logo">
                 </div>
 
-                {{-- <i class="bi bi-upload icon"></i> --}}
             </div>
         </div>
     </div>
@@ -99,9 +97,6 @@
             const gotoHistory = document.getElementById('gotoHistory');
             const showHistoryBtn = document.getElementById('showHistoryBtn');
 
-            // =======================
-            // CAMERA INIT
-            // =======================
             let stream = null;
 
             async function startCamera() {
@@ -124,9 +119,6 @@
                 }
             }
 
-            // =======================
-            // RESIZE UTILITY
-            // =======================
             function resizeImageFile(file, maxSize = 800) {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -172,9 +164,6 @@
                 });
             }
 
-            // =======================
-            // VIEW ANIMATION
-            // =======================
             function showResultView(imageSrc) {
                 if (imageSrc) resultLarge.src = imageSrc;
 
@@ -215,9 +204,6 @@
             showHistoryBtn.onclick = () => window.location.href = "/riwayat";
             gotoHistory.onclick = () => window.location.href = "/riwayat";
 
-            // =======================
-            // HISTORY SYSTEM — FINAL STRUCTURE
-            // =======================
             function saveToHistory(entry) {
                 let history = JSON.parse(localStorage.getItem("scan_history")) || [];
                 history.unshift(entry);
@@ -233,7 +219,6 @@
 
                 if (!video || video.readyState < 2) return alert("Kamera belum siap.");
 
-                // capture canvas
                 const canvas = document.createElement("canvas");
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
@@ -241,13 +226,11 @@
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(video, 0, 0);
 
-                // resize for upload
                 const resizedBlob = await new Promise(resolve =>
                     canvas.toBlob(resolve, "image/jpeg", 0.85)
                 );
                 const base64Image = await fileToBase64(resizedBlob);
 
-                // show UI
                 resultText.innerHTML = "⏳ Memproses...";
                 chatReplyBox.innerHTML = currentMode === "classify" ?
                     "🤖 Sedang memproses jawaban..." :
@@ -301,11 +284,12 @@
                     } catch {}
 
                     chatReplyBox.innerHTML = `
-                <div class="p-3 rounded" style="background:#E8FFD8;border-left:5px solid #6CC46C;">
-                    <b>Pertanyaan:</b><br>${autoMsg}<br><br>
-                    <b>Jawaban W.A.S.T.E AI:</b><br>${chatJson.reply}
-                </div>
-            `;
+                        <div class="p-3 rounded" style="background:#E8FFD8;border-left:5px solid #6CC46C;">
+                            <b>Pertanyaan:</b><br>${autoMsg}<br><br>
+                            <b>Jawaban W.A.S.T.E AI:</b><br>
+                            <div style="white-space:pre-wrap; margin-bottom: 0;">${chatJson.reply}</div>
+                        </div>
+                    `;
 
                     saveToHistory({
                         image: base64Image,
@@ -407,11 +391,12 @@
                     } catch {}
 
                     chatReplyBox.innerHTML = `
-                <div class="p-3 rounded" style="background:#E8FFD8;border-left:5px solid #6CC46C;">
-                    <b>Pertanyaan:</b><br>${autoMsg}<br><br>
-                    <b>Jawaban W.A.S.T.E AI:</b><br>${chatJson.reply}
-                </div>
-            `;
+                        <div class="p-3 rounded" style="background:#E8FFD8;border-left:5px solid #6CC46C;">
+                            <b>Pertanyaan:</b><br>${autoMsg}<br><br>
+                            <b>Jawaban W.A.S.T.E AI:</b><br>
+                            <div style="white-space:pre-wrap; margin-bottom: 0;">${chatJson.reply}</div>
+                        </div>
+                    `;
 
                     saveToHistory({
                         image: base64,

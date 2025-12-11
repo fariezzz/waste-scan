@@ -34,12 +34,10 @@
         </div>
     </div>
 
-    {{-- MODAL DETAIL (Bootstrap) --}}
     <div class="modal fade" id="detailModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content detail-modal">
 
-                <!-- HEADER -->
                 <div class="detail-header">
                     <div class="header-group">
                         <div class="header-title">No.</div>
@@ -56,13 +54,11 @@
                     </div>
                 </div>
 
-                <!-- BODY -->
                 <div class="detail-body text-center">
                     <img id="modalGambar" src="" class="detail-image mb-3" style="display:none;">
                     <p id="modalHasil" class="detail-text"></p>
                 </div>
 
-                <!-- FOOTER -->
                 <div class="detail-footer">
                     <button type="button" class="btn btn-confirm fw-bold" data-bs-dismiss="modal">OK</button>
                 </div>
@@ -71,7 +67,6 @@
         </div>
     </div>
 
-    {{-- MODAL CUSTOM HAPUS SEMUA --}}
     <div id="clearHistoryModal" class="reset-modal-overlay d-none">
         <div class="reset-modal-box">
             <h4>Hapus Semua Riwayat?</h4>
@@ -107,40 +102,38 @@
                 clearAllBtn.classList.remove("d-none");
             }
 
-            // Build Table
             history.forEach((item, index) => {
 
                 let row = `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${item.tanggal}</td>
-            <td>${item.jenis_scan}</td>
-            <td>${item.jenis_sampah}</td>
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.tanggal}</td>
+                        <td>${item.jenis_scan}</td>
+                        <td>${item.jenis_sampah}</td>
 
-            <td>
-                <button 
-                    class="btn p-0 openDetail"
-                    data-index="${index}"
-                    data-no="${index + 1}"
-                    data-tanggal="${item.tanggal}"
-                    data-scan="${item.jenis_scan}"
-                    data-jenis="${item.jenis_sampah}"
-                    data-kategori="${item.kategori_sampah}"
-                    data-ai="${item.hasil_ai}"
-                    data-gambar="${item.image}"
-                    data-bs-toggle="modal"
-                    data-bs-target="#detailModal"
-                >
-                    <i class="bi bi-info-circle fs-5 text-primary"></i>
-                </button>
-            </td>
-        </tr>
-    `;
+                        <td>
+                            <button 
+                                class="btn p-0 openDetail"
+                                data-index="${index}"
+                                data-no="${index + 1}"
+                                data-tanggal="${item.tanggal}"
+                                data-scan="${item.jenis_scan}"
+                                data-jenis="${item.jenis_sampah}"
+                                data-kategori="${item.kategori_sampah}"
+                                data-ai="${item.hasil_ai}"
+                                data-gambar="${item.image}"
+                                data-bs-toggle="modal"
+                                data-bs-target="#detailModal"
+                            >
+                                <i class="bi bi-info-circle fs-5 text-primary"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
 
                 body.insertAdjacentHTML("beforeend", row);
             });
 
-            // Detail Handler
             document.querySelectorAll(".openDetail").forEach(btn => {
                 btn.onclick = () => {
 
@@ -148,11 +141,11 @@
                     document.getElementById("modalTanggal").innerText = btn.dataset.tanggal;
 
                     const hasilHtml = `
-                <b>Jenis Scan:</b> ${btn.dataset.scan}<br>
-                <b>Jenis Sampah:</b> ${btn.dataset.jenis}<br>
-                <b>Kategori:</b> ${btn.dataset.kategori}<br><br>
-                <b>Hasil AI:</b><br>${btn.dataset.ai}
-            `;
+                        <b>Jenis Scan:</b> ${btn.dataset.scan}<br>
+                        <b>Jenis Sampah:</b> ${btn.dataset.jenis}<br>
+                        <b>Kategori:</b> ${btn.dataset.kategori}<br><br>
+                        <b>Hasil AI:</b><br><div style="white-space: pre-wrap;">${btn.dataset.ai}</div>
+                    `;
 
                     document.getElementById("modalHasil").innerHTML = hasilHtml;
 
@@ -166,7 +159,6 @@
                 };
             });
 
-            // Modal "hapus semua"
             clearAllBtn.onclick = () => clearModal.classList.remove("d-none");
             cancelClearBtn.onclick = () => clearModal.classList.add("d-none");
 
