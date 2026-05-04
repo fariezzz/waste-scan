@@ -1,9 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 use App\Http\Controllers\EdukasiController;
-use App\Http\Controllers\RiwayatController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\AIController;
 

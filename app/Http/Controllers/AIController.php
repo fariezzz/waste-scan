@@ -17,10 +17,6 @@ class AIController extends Controller
         $file = $request->file('image');
         $mode = $request->mode;
 
-        // $fastApiUrl = $mode === 'classify'
-        //     ?  'http://127.0.0.1:8002/classify'
-        //     :  'http://127.0.0.1:8002/detect';
-
         $fastApiUrl = $mode === 'classify'
         ? env('FASTAPI_URL_CLASSIFY', 'http://127.0.0.1:8002/classify')
         : env('FASTAPI_URL_DETECT', 'http://127.0.0.1:8002/detect');

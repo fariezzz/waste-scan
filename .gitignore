@@ -65,3 +65,7 @@ Thumbs.db
 # --- Logs ---
 *.log
 logs/
+
+# --- Runtime artifacts ---
+temp.jpg
+chatbot/chat_history.txt

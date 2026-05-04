@@ -50,8 +50,6 @@
 
         <div id="aiChatReply" class="text-start" style="font-size: 16px; display:block;"></div>
     </div>
-
-    <img id="result" class="mt-3 w-100 rounded" style="border:1px solid #ccc; display:none;" />
 @endsection
 
 @push('script')
