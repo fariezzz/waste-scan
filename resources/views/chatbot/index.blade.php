@@ -101,6 +101,13 @@
                 appendMessage(text, "user");
                 messageInput.value = "";
 
+                const historyForApi = chatHistory
+                    .map(m => ({
+                        role: m.sender === "user" ? "user" : "assistant",
+                        content: m.text
+                    }))
+                    .slice(-12);
+
                 if (!firstMessageSent) {
                     firstMessageSent = true;
                     welcomeBox.classList.add("d-none");
@@ -115,7 +122,8 @@
                             "X-CSRF-TOKEN": "{{ csrf_token() }}"
                         },
                         body: JSON.stringify({
-                            message: text
+                            message: text,
+                            history: historyForApi
                         })
                     })
                     .then(res => res.json())
